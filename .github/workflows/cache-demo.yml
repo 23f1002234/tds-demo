@@ -1,0 +1,52 @@
+name: Dependency Caching Demo
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+    branches:
+      - main
+
+jobs:
+  build-with-cache:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Cache dependencies
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            venv
+          key: cache-e998795-${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            cache-e998795-${{ runner.os }}-pip-
+      
+      - name: prime-cache-e998795
+        run: |
+          if [[ "${{ steps.cache-deps.outputs.cache-hit }}" == "true" ]]; then
+            echo "Cache hit! Dependencies were restored from cache."
+          else
+            echo "Cache miss! Dependencies will be downloaded and cached."
+          fi
+          echo "Cache hit status: ${{ steps.cache-deps.outputs.cache-hit }}"
+      
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests pandas numpy
+      
+      - name: Run a simple test
+        run: |
+          python -c "import requests; print('requests version:', requests.__version__)"
+          python -c "import pandas; print('pandas version:', pandas.__version__)"
+          python -c "import numpy; print('numpy version:', numpy.__version__)"
