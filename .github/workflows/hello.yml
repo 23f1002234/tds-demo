@@ -1,0 +1,21 @@
+name: Hello World Action
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+    branches:
+      - main
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 23f1002234@ds.study.iitm.ac.in
+        run: echo "Hello, world! This step contains my email address."
+      
+      - name: Show date and time
+        run: date
+      
+      - name: Print success message
+        run: echo "GitHub Action completed successfully!"
